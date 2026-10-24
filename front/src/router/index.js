@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '../layouts/AppLayout.vue'
 import PlaceholderView from '../views/PlaceholderView.vue'
+import PortalView from '../views/PortalView.vue'
 
 // 四个业务模块当前仅展示占位页，后续可逐一替换为真实模块页面
 const moduleRoutes = [
@@ -46,15 +47,22 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      // 独立门户页，不套用后台侧边栏布局
+      path: '/portal',
+      name: 'Portal',
+      component: PortalView,
+      meta: { title: '门户首页' }
+    },
+    {
       path: '/',
       component: AppLayout,
-      redirect: '/funds',
+      redirect: '/portal',
       children: moduleRoutes
     },
     {
-      // 未知路径统一回到第一个模块
+      // 未知路径统一回到门户首页
       path: '/:pathMatch(.*)*',
-      redirect: '/funds'
+      redirect: '/portal'
     }
   ]
 })

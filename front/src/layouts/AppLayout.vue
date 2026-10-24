@@ -1,90 +1,43 @@
 <template>
-  <el-container class="app-layout">
-    <!-- 左侧导航栏 -->
-    <el-aside width="240px" class="app-aside">
-      <div class="app-brand">
-        <div class="app-brand-icon">
-          <el-icon :size="24"><House /></el-icon>
+  <el-container class="app-layout" direction="vertical">
+    <!-- 模块页顶部栏：不显示侧边栏，仅保留返回门户入口 -->
+    <el-header class="app-header">
+      <div class="app-header-left">
+        <router-link to="/portal" class="app-back" title="返回门户首页">
+          <el-icon><ArrowLeft /></el-icon>
+          <span>返回门户</span>
+        </router-link>
+
+        <span class="app-header-divider"></span>
+
+        <div class="app-header-brand">
+          <el-icon :size="20"><House /></el-icon>
+          <span class="app-header-title">住建局综合业务功能</span>
         </div>
-        <div>
-          <div class="app-brand-title">住建业务演示</div>
-          <div class="app-brand-subtitle">综合业务功能</div>
-        </div>
+        <el-tag size="small" effect="plain" class="app-demo-tag">演示环境</el-tag>
       </div>
 
-      <el-menu
-        :default-active="activeMenu"
-        router
-        class="app-menu"
-        background-color="transparent"
-        text-color="#c9d8ef"
-        active-text-color="#ffffff"
-      >
-        <el-menu-item index="/funds">
-          <el-icon><Money /></el-icon>
-          <span>住宅专项维修资金</span>
-        </el-menu-item>
-        <el-menu-item index="/lease">
-          <el-icon><OfficeBuilding /></el-icon>
-          <span>国有资产租赁更新</span>
-        </el-menu-item>
-        <el-menu-item index="/housing">
-          <el-icon><MapLocation /></el-icon>
-          <span>直管公房一张图</span>
-        </el-menu-item>
-        <el-menu-item index="/documents">
-          <el-icon><Document /></el-icon>
-          <span>政务公文接收</span>
-        </el-menu-item>
-      </el-menu>
-    </el-aside>
+      <div class="app-header-right">
+        <span class="app-date">{{ today }}</span>
+        <el-tag :type="healthTagType" effect="light" size="small">
+          {{ healthText }}
+        </el-tag>
+      </div>
+    </el-header>
 
-    <el-container class="app-body">
-      <!-- 顶部信息栏 -->
-      <el-header class="app-header">
-        <div class="app-header-left">
-          <span class="app-header-title">住建局综合业务功能</span>
-          <el-tag size="small" effect="plain" class="app-demo-tag">演示环境</el-tag>
-        </div>
-        <div class="app-header-right">
-          <span class="app-date">{{ today }}</span>
-          <el-tag :type="healthTagType" effect="light" size="small">
-            {{ healthText }}
-          </el-tag>
-        </div>
-      </el-header>
-
-      <!-- 业务内容区：当前四个模块均为白色占位页 -->
-      <el-main class="app-main">
-        <router-view />
-      </el-main>
-    </el-container>
+    <!-- 模块内容区：全宽显示占位页或后续业务页面 -->
+    <el-main class="app-main">
+      <router-view />
+    </el-main>
   </el-container>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { House, Money, OfficeBuilding, MapLocation, Document } from '@element-plus/icons-vue'
-import { getHealth } from '../api/health'
+import { ArrowLeft, House } from '@element-plus/icons-vue'
+import { useBackendHealth } from '../composables/useBackendHealth'
 
-const route = useRoute()
-
-// 当前激活菜单与路由路径保持一致
-const activeMenu = computed(() => route.path)
-
-// 后端健康状态：checking 检测中、online 正常、offline 未连接
-const healthStatus = ref('checking')
-const healthText = computed(() => {
-  if (healthStatus.value === 'online') return '后端服务正常'
-  if (healthStatus.value === 'offline') return '后端未连接'
-  return '后端检测中'
-})
-const healthTagType = computed(() => {
-  if (healthStatus.value === 'online') return 'success'
-  if (healthStatus.value === 'offline') return 'danger'
-  return 'info'
-})
+// 后端健康状态由共享 composable 提供
+const { healthText, healthTagType } = useBackendHealth()
 
 // 顶栏展示的当前日期
 const today = new Intl.DateTimeFormat('zh-CN', {
@@ -92,21 +45,6 @@ const today = new Intl.DateTimeFormat('zh-CN', {
   month: '2-digit',
   day: '2-digit'
 }).format(new Date())
-
-/**
- * 查询后端健康状态。
- * 请求失败时只更新状态展示，不影响前端页面浏览。
- */
-async function checkBackendHealth() {
-  try {
-    const data = await getHealth()
-    healthStatus.value = data?.status === 'UP' ? 'online' : 'offline'
-  } catch {
-    healthStatus.value = 'offline'
-  }
-}
-
-onMounted(checkBackendHealth)
 </script>
 
 <style scoped>
@@ -115,74 +53,11 @@ onMounted(checkBackendHealth)
   overflow: hidden;
 }
 
-.app-aside {
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(180deg, #123a6b 0%, #0b2647 100%);
-  color: #ffffff;
-}
-
-.app-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.app-brand-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.app-brand-title {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: 1px;
-}
-
-.app-brand-subtitle {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #9fb8d8;
-  letter-spacing: 2px;
-}
-
-.app-menu {
-  flex: 1;
-  padding: 12px 0;
-  border-right: none;
-}
-
-.app-menu :deep(.el-menu-item) {
-  height: 48px;
-  margin: 4px 10px;
-  border-radius: 8px;
-  line-height: 48px;
-}
-
-.app-menu :deep(.el-menu-item:hover) {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.app-menu :deep(.el-menu-item.is-active) {
-  background: rgba(255, 255, 255, 0.16);
-  font-weight: 600;
-}
-
-.app-body {
-  min-width: 0;
-}
-
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   height: 64px;
   padding: 0 24px;
   background: #ffffff;
@@ -194,20 +69,62 @@ onMounted(checkBackendHealth)
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
-.app-header-title {
-  font-size: 17px;
-  font-weight: 600;
+.app-back {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #1f5fae;
+  text-decoration: none;
+  background: #eef4fc;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.app-back:hover {
+  background: #dde9f8;
+}
+
+.app-back:focus-visible {
+  outline: 2px solid #1f5fae;
+  outline-offset: 2px;
+}
+
+.app-header-divider {
+  width: 1px;
+  height: 20px;
+  background: #e2e9f2;
+}
+
+.app-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
   color: #1f2d3d;
 }
 
+.app-header-title {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .app-demo-tag {
+  flex-shrink: 0;
   color: #1f5fae;
   border-color: #b9d0ec;
 }
 
 .app-date {
+  flex-shrink: 0;
   font-size: 13px;
   color: #7a8699;
 }
@@ -216,5 +133,29 @@ onMounted(checkBackendHealth)
   padding: 0;
   overflow: auto;
   background: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .app-date {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .app-header-left,
+  .app-header-right {
+    gap: 8px;
+  }
+
+  .app-header-divider,
+  .app-header-title,
+  .app-demo-tag {
+    display: none;
+  }
 }
 </style>

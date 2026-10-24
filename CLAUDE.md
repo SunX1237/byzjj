@@ -5,7 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 项目概况
 
 - 住建局综合业务演示系统，前后端分离。
-- 四个业务模块（住宅专项维修资金、国有资产租赁更新、直管公房一张图、政务公文接收）当前均为**占位页**，只显示固定文本，尚未实现业务功能。
+- 四个业务模块（住宅专项维修资金、国有资产租赁更新、直管公房一张图、政务公文接收）的页面仍为**占位页**，只显示固定文本，尚未实现业务功能。
+- 系统新增独立门户页 `/portal`，集中展示四个模块入口；点击卡片进入对应模块页。模块页不显示侧边栏，顶栏提供「返回门户」入口。
 - 前端 Vue 3 + Vite 7 + Element Plus，端口 4000；后端 Java 21 + Spring Boot 4.1.2，端口 3000。
 - 环境要求：JDK 21、Node 20.19+ 或 22.12+。当前无数据库、登录鉴权、图表和地图依赖。
 
@@ -51,10 +52,11 @@ npm run preview   # 预览生产构建
 ### 前端结构
 
 - `front/src/main.js` 注册 Element Plus（中文 locale）与路由。
-- `front/src/layouts/AppLayout.vue` 是后台壳：左侧菜单、顶栏、后端健康状态；子路由内容渲染在 `el-main` 中。
-- `front/src/router/index.js` 定义四条子路由：`/funds`、`/lease`、`/housing`、`/documents`；`/` 和未知路径都重定向到 `/funds`。
-- 四条路由当前全部复用 `front/src/views/PlaceholderView.vue`，页面标题和说明来自路由 `meta`。替换模块页面时修改 `router/index.js` 中的 `component` 即可。
-- `front/src/api/health.js` 调用 `/api/health`，供顶栏显示「后端服务正常 / 后端未连接」。请求失败只会改变状态标签，不会阻塞页面。
+- `front/src/router/index.js` 中 `/portal` 是独立门户路由（不套用 `AppLayout`）；`/` 和未知路径都重定向到 `/portal`；`/funds`、`/lease`、`/housing`、`/documents` 作为 `AppLayout` 子路由。
+- `front/src/layouts/AppLayout.vue` 是模块页后台壳：顶部栏（含「返回门户」链接）+ 全宽内容区，不显示侧边栏；顶栏展示系统名称、当前日期与后端健康状态，子路由内容渲染在 `el-main` 中。
+- `front/src/views/PortalView.vue` 是全屏门户页：四张模块卡片、系统标题、后端状态；模块入口配置在其 `modules` 数组中，卡片使用 `<router-link>` 跳转。
+- 四个模块路由当前复用 `front/src/views/PlaceholderView.vue`，页面标题和说明来自路由 `meta`。替换模块页面时修改 `router/index.js` 中的 `component` 即可。
+- `front/src/composables/useBackendHealth.js` 封装三态健康检查，`PortalView.vue` 与 `AppLayout.vue` 共用；`front/src/api/health.js` 调用 `/api/health`。请求失败只会改变状态标签，不会阻塞页面。
 - 主题与全局样式在 `front/src/styles/global.css`（政务蓝）。
 
 ### 后端结构
@@ -71,7 +73,7 @@ npm run preview   # 预览生产构建
 2. 在 `front/src/api/` 新增模块 API 文件，复用 `request.js`。
 3. 后端在 `gov.byzjj.<module>` 下新增 Controller/Service，接口保持 `/api` 前缀并返回 `ApiResponse`。
 4. 同步更新 `API.md`（接口契约）、`HelpingDoc.md`（使用说明）和当日 `.claude-logs/YYYY-MM-DD.md`。
-5. 新增菜单项或调整布局时修改 `front/src/layouts/AppLayout.vue`。
+5. 调整模块页顶栏或布局时修改 `front/src/layouts/AppLayout.vue`；新增模块入口时同步更新 `front/src/views/PortalView.vue` 的 `modules` 数组。
 
 ## 项目约定
 
