@@ -24,4 +24,16 @@ public record ApiResponse<T>(int code, String message, T data, LocalDateTime tim
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(0, "success", data, LocalDateTime.now());
     }
+
+    /**
+     * 创建错误响应。
+     *
+     * @param code    业务状态码，同时与 HTTP 状态保持一致
+     * @param message 中文错误提示
+     * @param <T>     响应数据类型
+     * @return 统一错误响应
+     */
+    public static <T> ApiResponse<T> error(int code, String message) {
+        return new ApiResponse<>(code, message, null, LocalDateTime.now());
+    }
 }

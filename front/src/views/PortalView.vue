@@ -47,7 +47,9 @@
                 <component :is="module.icon" />
               </el-icon>
             </div>
-            <el-tag type="info" effect="plain" size="small">功能建设中</el-tag>
+            <el-tag :type="module.statusType" effect="plain" size="small">
+              {{ module.status }}
+            </el-tag>
           </div>
 
           <h2 class="module-title">{{ module.title }}</h2>
@@ -91,10 +93,12 @@ const modules = [
   {
     path: '/funds',
     title: '住宅专项维修资金',
-    description: '资金交存、使用、结息与余额查询',
+    description: '按项目、楼幢、单元、房屋查询资金交存、使用、结息与余额',
     icon: Money,
     color: '#1f5fae',
-    bgColor: '#e8f1fb'
+    bgColor: '#e8f1fb',
+    status: '已上线',
+    statusType: 'success'
   },
   {
     path: '/lease',
@@ -102,7 +106,9 @@ const modules = [
     description: '资产台账、租赁合同与续租管理',
     icon: OfficeBuilding,
     color: '#1f8a70',
-    bgColor: '#e6f5f0'
+    bgColor: '#e6f5f0',
+    status: '功能建设中',
+    statusType: 'info'
   },
   {
     path: '/housing',
@@ -110,7 +116,9 @@ const modules = [
     description: '公房点位分布与空间信息一张图展示',
     icon: MapLocation,
     color: '#c47b1a',
-    bgColor: '#fdf2e3'
+    bgColor: '#fdf2e3',
+    status: '功能建设中',
+    statusType: 'info'
   },
   {
     path: '/documents',
@@ -118,7 +126,9 @@ const modules = [
     description: '政务公文收文、签收与办理跟踪',
     icon: Document,
     color: '#6b4fbb',
-    bgColor: '#f0ecfb'
+    bgColor: '#f0ecfb',
+    status: '功能建设中',
+    statusType: 'info'
   }
 ]
 </script>

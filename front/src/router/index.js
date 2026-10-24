@@ -2,16 +2,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '../layouts/AppLayout.vue'
 import PlaceholderView from '../views/PlaceholderView.vue'
 import PortalView from '../views/PortalView.vue'
+import FundQueryView from '../views/funds/FundQueryView.vue'
 
-// 四个业务模块当前仅展示占位页，后续可逐一替换为真实模块页面
+// 维修资金已实现查询页面，其余三个模块仍为占位页
 const moduleRoutes = [
   {
     path: 'funds',
     name: 'Funds',
-    component: PlaceholderView,
+    component: FundQueryView,
     meta: {
       title: '住宅专项维修资金',
-      description: '本模块功能暂未实现。'
+      description: '按项目、楼幢、单元、房屋查询资金交存、使用、结息与余额。'
     }
   },
   {

@@ -2,14 +2,14 @@
 
 ## 1. 项目简介
 
-本项目是一个前后端分离的 Web Demo 骨架，提供统一门户页和四个业务模块：
+本项目是一个前后端分离的 Web Demo，提供统一门户页和四个业务模块：
 
-1. 住宅专项维修资金
+1. 住宅专项维修资金（已实现资金查询）
 2. 国有资产租赁更新
 3. 直管公房一张图
 4. 政务公文接收
 
-**当前阶段不实现任何业务功能**。系统入口为门户页 `/portal`，页面展示四张模块卡片；点击卡片进入对应模块后，显示白色占位页面和固定文本「本模块功能暂未实现。」。门户页与模块页都会显示后端服务连接状态。
+系统入口为门户页 `/portal`，页面展示四张模块卡片。**住宅专项维修资金已支持按项目、楼幢、单元、房屋实时查询资金交存、使用、结息与余额**；其余三个模块仍为占位页，只显示固定文本「本模块功能暂未实现。」。门户页与模块页都会显示后端服务连接状态。
 
 ## 2. 技术栈
 
@@ -17,7 +17,7 @@
 |---|---|
 | 前端 | Vue 3.5、Vite 7、Element Plus 2、Vue Router 4、Axios |
 | 后端 | Java 21、Spring Boot 4.1.2、Gradle |
-| 数据 | 当前无数据库 |
+| 数据 | H2 内存库（维修资金演示数据，重启重置） |
 | 通信 | 前端 `/api` 请求由 Vite 代理到后端 3000 端口 |
 
 ## 3. 环境要求
@@ -34,21 +34,25 @@
 byzjj/
 ├── front/                          # Vue 前端
 │   ├── src/
-│   │   ├── api/                    # Axios 封装与接口
+│   │   ├── api/                    # Axios 封装与接口（含 funds.js）
 │   │   ├── composables/            # 共享组合式逻辑（后端健康状态）
 │   │   ├── layouts/AppLayout.vue   # 模块页顶部栏（返回门户）+ 内容区
 │   │   ├── router/index.js         # 门户与四个模块路由
+│   │   ├── utils/format.js         # 金额、面积、日期格式化
 │   │   ├── views/PortalView.vue    # 统一门户页
-│   │   ├── views/PlaceholderView.vue # 模块占位页
+│   │   ├── views/funds/FundQueryView.vue # 维修资金查询页
+│   │   ├── views/PlaceholderView.vue # 其余模块占位页
 │   │   └── styles/global.css
 │   ├── vite.config.js              # 4000 端口与 /api 代理
 │   └── package.json
 ├── backend/                        # Spring Boot 后端
-│   └── src/main/java/gov/byzjj/
-│       ├── ByzjjBackendApplication.java
-│       ├── common/ApiResponse.java
-│       ├── config/WebConfig.java   # CORS
-│       └── controller/HealthController.java
+│   ├── src/main/java/gov/byzjj/
+│   │   ├── ByzjjBackendApplication.java
+│   │   ├── common/                 # 统一响应、业务异常、全局异常处理
+│   │   ├── config/WebConfig.java   # CORS
+│   │   ├── controller/HealthController.java
+│   │   └── funds/                  # 维修资金实体、仓储、服务、接口、种子数据
+│   └── src/main/resources/application.properties
 ├── API.md                          # 接口文档
 ├── HelpingDoc.md                   # 本文档
 ├── .claude-logs/                   # 操作日志
@@ -85,6 +89,8 @@ java -jar build/libs/byzjj-backend-0.0.1-SNAPSHOT.jar
 curl http://localhost:3000/api/health
 ```
 
+后端首次启动会自动创建 H2 内存库并生成维修资金演示数据；重启后数据重置。
+
 ### 5.2 启动前端（端口 4000）
 
 ```bash
@@ -101,13 +107,15 @@ npm run dev
 
 ## 6. 页面说明
 
-- **门户页 `/portal`**：不显示侧边栏，顶部为系统名称与后端状态；页面中央展示四张业务模块卡片，卡片包含模块名称、功能说明和「功能建设中」标签。点击卡片进入对应模块。
-- **模块页**：不显示侧边栏，顶部栏左侧提供「返回门户」按钮，下方为全宽白色占位页和固定文本。
+- **门户页 `/portal`**：不显示侧边栏，顶部为系统名称与后端状态；页面中央展示四张业务模块卡片。维修资金卡片显示「已上线」，其余三张显示「功能建设中」。点击卡片进入对应模块。
+- **模块页**：不显示侧边栏，顶部栏左侧提供「返回门户」按钮。
+  - 维修资金页：支持按项目、楼幢、单元、房屋级联筛选；展示累计交存、累计使用、累计结息、当前余额；未选房屋时显示房屋汇总列表，可点击「查看明细」下钻；选到房屋后显示房屋信息和资金流水标签页。
+  - 其余三个模块：显示全宽白色占位页和固定文本。
 - 门户页与模块页右上角显示当前日期与后端连接状态：
   - 「后端服务正常」：`GET /api/health` 返回 `status=UP`
   - 「后端未连接」：后端未启动或请求失败，页面仍可正常浏览
 - 门户页为响应式布局：桌面端 2×2 卡片，窄屏（900px 以下）单列显示。
-- 当前没有登录页、数据库、表格、图表、地图等业务内容。
+- 维修资金数据来自 H2 内存库，重启后端后恢复初始演示数据。
 
 ## 7. 前后端联通
 
@@ -167,11 +175,18 @@ npm run build
 - 开发环境 Vite 已处理 history fallback，直接访问 `/portal`、`/funds` 等路径正常。
 - 生产部署到 Nginx 等静态服务器时，需要将未知路径回退到 `index.html`，否则刷新模块页会出现 404。
 
+### 9.7 维修资金查询无数据
+
+1. 确认后端已启动，且启动日志出现「已生成维修资金演示数据」。
+2. 演示数据使用 H2 内存库，重启后端会重置并重新生成。
+3. 页面顶部若出现「重新加载」提示，待后端就绪后点击重试。
+4. 可访问 `http://localhost:3000/api/funds/tree` 验证是否返回项目层级。
+
 ## 10. 后续扩展建议
 
-1. 在 `front/src/views/` 下为四个模块创建真实页面。
-2. 在 `front/src/router/index.js` 中将 `PlaceholderView` 替换为对应模块页面组件。
-3. 在 `front/src/views/PortalView.vue` 的 `modules` 数组中更新模块说明与入口；模块页顶栏布局在 `front/src/layouts/AppLayout.vue`。
+1. 维修资金查询页可作为实现参考；在 `front/src/views/` 下为其余三个模块创建真实页面。
+2. 在 `front/src/router/index.js` 中将对应的 `PlaceholderView` 替换为模块页面组件。
+3. 在 `front/src/views/PortalView.vue` 的 `modules` 数组中更新模块说明、状态与入口；模块页顶栏布局在 `front/src/layouts/AppLayout.vue`。
 4. 在 `front/src/api/` 下按模块新增接口封装，沿用统一响应解包逻辑。
-5. 后端按 `/api/funds`、`/api/lease`、`/api/housing`、`/api/documents` 前缀新增 Controller、Service 与数据层。
+5. 后端按 `/api/lease`、`/api/housing`、`/api/documents` 前缀新增 Controller、Service 与数据层；维修资金接口已实现，可作为分层参考。
 6. 新增接口时同步更新 `API.md`，功能变化同步更新本文档与 `.claude-logs/`。
