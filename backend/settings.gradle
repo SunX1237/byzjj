@@ -1,0 +1,2 @@
+// 后端 Gradle 工程名称
+rootProject.name = 'byzjj-backend'

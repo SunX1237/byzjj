@@ -1,0 +1,32 @@
+:root {
+  --app-primary: #1f5fae;
+
+  /* Element Plus 政务蓝主题色及衍生色 */
+  --el-color-primary: #1f5fae;
+  --el-color-primary-light-3: #4d82c4;
+  --el-color-primary-light-5: #7ba3d4;
+  --el-color-primary-light-7: #a9c3e4;
+  --el-color-primary-light-8: #c0d3ec;
+  --el-color-primary-light-9: #e3ecf7;
+  --el-color-primary-dark-2: #194c8b;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+  color: #1f2d3d;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,20 @@
+# Gradle / Java
+backend/.gradle/
+backend/build/
+backend/out/
+*.class
+.claude-logs/
+*.log
+
+# Node / Vite
+front/node_modules/
+front/dist/
+front/.vite/
+npm-debug.log*
+
+# IDE 与系统文件
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
